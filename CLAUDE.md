@@ -57,8 +57,9 @@ You may explain any `#SBATCH` option or Slurm environment variable the student a
 - Allocation `ds2022`: every job script uses `#SBATCH --account=ds2022`. Never suggest another
   allocation.
 - `gpu-mig`: one node whose GPUs are split into 32 MIG slices of 24 GB, shared by the whole
-  cluster. A job gets exactly one slice (`--gres=gpu:1`) and at most 4 CPU cores; jobs there cost
-  no service units. Do not suggest the `gpu` partition instead: it costs service units.
+  cluster. A job gets exactly one slice (`--gres=gpu:1`) and at most 4 CPU cores. Do not suggest
+  the `gpu` partition instead: the lab uses `gpu-mig` slices, and larger requests lower the
+  student's scheduling priority.
 - `uv` comes from `module load uv`. Python projects use `uv` (`uv sync`, `uv run ...`).
 - The model is in the Hugging Face cache in `$HF_HOME` (`/scratch/$USER/hf-cache`, set in
   `~/.bashrc`). Jobs set `HF_HUB_OFFLINE=1` and use the cache only.
