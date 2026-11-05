@@ -88,7 +88,7 @@ Write your answers in `KNOWLEDGE_CHECK.md`. Do not modify `README.md`.
   "runs": [
     {"host": "my-laptop",      "at": "2026-10-27T14:41:05Z"},
     {"host": "ip-172-31-5-20", "at": "2026-10-27T15:02:11Z"},
-    {"host": "udc-an36-1",     "at": "2026-11-12T15:20:41Z", "job": "4211873_1"}
+    {"host": "udc-aw37-1",     "at": "2026-11-12T15:20:41Z", "job": "4211873_1"}
   ]
 }
 ```
@@ -250,7 +250,7 @@ aws sts get-caller-identity
 | copy every `.txt` file of the bucket into the book directory, and nothing else (not `index.html`) | [`aws s3 cp`](https://docs.aws.amazon.com/cli/latest/reference/s3/cp.html) with `--recursive`, `--exclude "*"`, and `--include "*.txt"` |
 | write a new file `book_list.txt` in the current directory: first the header line `File path`, then one book file per line | `echo` with `>` for the first line, `>>` to append the others |
 | list the **absolute path** of each book file, such as `/scratch/mst3k/books/pg1013.txt`, not `pg1013.txt` or `books/pg1013.txt` | [`find`](https://www.gnu.org/software/findutils/manual/find.html) with `-name "*.txt"` prints each path starting with the directory you give it, so give it an absolute directory; [`realpath`](https://www.gnu.org/software/coreutils/manual/html_node/realpath-invocation.html) turns a relative directory into an absolute one |
-| list the books in sorted order, so that a task number always means the same book | `sort` |
+| list the books in sorted order, so that rerunning `get_books.sh` gives the same list, and a task number keeps meaning the same book | `sort`, or a shell pattern such as `"$2"/*`, which the shell sorts |
 | print how many books it listed | `wc -l`, without the header |
 | stop at the first error, for example when your credentials expired | `set -euo pipefail` below the line `#!/bin/bash` |
 
@@ -271,19 +271,24 @@ File path
 /scratch/mst3k/books/pg10148.txt
 ```
 
+Your paths may start with `/sfs/weka/scratch/` instead of `/scratch/`, for example `/sfs/weka/scratch/mst3k/books/pg1013.txt`. On UVA HPC, `/scratch` points to that directory, and `realpath` prints the full path it resolves to. That is fine: both paths name the same files, on every node.
+
 The 101 books consist of the 100 books from Lab 06 plus `pg74.txt` from Lab 07. If you uploaded additional books in Lab 07, your count will differ; use your count wherever this README uses 101.
 
 You now have local copies of all your books and a corresponding list of paths in `book_list.txt`. It is fine if your Learner Lab credentials expire after this point; you do not need them to submit or run the analysis jobs.
 
 ### 7. Test on the login node
 
-Check that you can reach your database:
+Check that you can reach your database. `report.py` prints one JSON document; `jq`, a command-line tool for JSON that the cluster provides as a module, picks two of its fields:
 
 ```bash
-uv run python src/book_analysis/report.py
+module load jq
+uv run python src/book_analysis/report.py | jq '{documents, summarized}'
 ```
 
-The command prints one JSON document. `documents` should be `101`, from Lab 07, and `summarized` should be `0`. If so, Atlas and your environment are configured correctly.
+`documents` should be `101`, from Lab 07, and `summarized` should be `0`. If so, Atlas and your environment are configured correctly.
+
+`module load` lasts only for the current shell. When you log in again, for example for Part 1, load the modules you need again: `uv` for every `uv run`, and `jq` for every `jq`.
 
 ## Part 1: Summarize all books with a Slurm job array
 
@@ -340,7 +345,7 @@ Now write the two functions:
     5. Pick the book: task `1` is the first book, so it is at index `task_id - 1` of your list. Its `_id` in MongoDB is the file name without the directory. *Hint:* split the absolute path at each `/` and take the last element: `"/scratch/mst3k/books/pg11.txt".split("/")[-1]` is `"pg11.txt"`. Log the task number and the path.
     6. Call `read_book()` and `summarize_book()`, and log the key, the genre, and how long it took: `time.time()` before and after.
     7. Build `job`: Slurm sets the variables `SLURM_ARRAY_JOB_ID` and `SLURM_ARRAY_TASK_ID` in each task of an array. Join them as `"4211873_5"`. Outside of Slurm the variables do not exist; then `job` is `None`. `os.environ.get()` returns `None` for a missing variable.
-    8. Call `upload_summary()`, then print one last line with the key, the time, and the host, for example `Summarized pg11.txt in 41.3 s on udc-an36-1`.
+    8. Call `upload_summary()`, then print one last line with the key, the time, and the host, for example `Summarized pg1013.txt in 7.0 s on udc-aw37-1`.
 
 **Check what you can on the login node.** Summarizing a book is real computation and belongs on a compute node: you test your `upload_summary()` and the rest of `main()` with one job in Step 3. Reading the arguments is quick to check here. Without arguments, the script must stop with your usage message and a nonzero exit code: `1` with your `sys.exit(1)`, `2` if you use `argparse`. A task number that is too large must stop it with your error message and exit code `1`:
 
@@ -370,9 +375,9 @@ Open [summarize.slurm](summarize.slurm) in the top directory of your cloned repo
 | `#SBATCH --job-name=<job name>`                | replace   | `summarize`, the name in the queue                                                                       |
 | `#SBATCH --partition=<partition>`              | replace   | `gpu-mig`; a partition is a group of nodes                                                               |
 | `#SBATCH --gres=gpu:1`                         | keep      | one GPU slice per task                                                                                   |
-| `#SBATCH --cpus-per-task=<CPU cores per task>` | replace   | 4 CPU cores                                                                                              |
+| `#SBATCH --cpus-per-task=<CPU cores per task>` | replace   | 2 CPU cores: with 16 GB of memory, a good match for the node's memory per core                          |
 | `#SBATCH --mem=<memory per task>`              | replace   | 16 GB; Slurm writes it as a number with the unit `G`                                                     |
-| `#SBATCH --time=<time limit per task, ...>`    | replace   | at most 15 minutes, as `HH:MM:SS`                                                                        |
+| `#SBATCH --time=<time limit per task, ...>`    | replace   | at most 5 minutes, as `HH:MM:SS`                                                                         |
 | `#SBATCH --array=<one task per book, ...>`     | replace   | **101** tasks, numbered **1 to 101**, one per book in `book_list.txt`                                    |
 | `#SBATCH --output=logs/summarize-%A_%a.out`    | keep      | each task writes into its own file: `%A` is the job ID of the array, `%a` the task ID                    |
 | `export HF_HUB_OFFLINE=1`                      | keep      | `transformers` reads the model from `$HF_HOME` only and does not contact the Hugging Face Hub            |
@@ -409,13 +414,17 @@ The number is the **job ID**. Wait until `squeue --me` no longer lists it (a few
 cat logs/summarize-4211860_1.out
 ```
 
-The log shows the line `INFO Running Qwen/Qwen2.5-1.5B-Instruct on cuda`, and one line for the book, with its genre and its time. The last line looks like this:
+The log looks like this:
 
 ```text
-Summarized pg1013.txt in 41.3 s on udc-an36-1
+INFO Task 1: /sfs/weka/scratch/mst3k/books/pg1013.txt
+INFO Running Qwen/Qwen2.5-1.5B-Instruct on cuda
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 29526.28it/s]
+INFO pg1013.txt: science fiction, 6.5 s
+Summarized pg1013.txt in 7.0 s on udc-aw37-1
 ```
 
-<!-- TODO: replace the example host and times in Steps 3 and 5 with those of a test run on the gpu-mig partition -->
+The first line is the book of this task, the second the device, and the progress bar comes from `transformers` while it loads the model. The fourth line has the genre and the time `summarize_book()` took, the last line the time of the whole task, including saving to MongoDB, and the node.
 
 `on cuda` means the model ran on the GPU. If the log ends with an error instead, find it in [Troubleshooting](#troubleshooting), fix it, and test again. Answer for yourself:
 
@@ -443,14 +452,15 @@ squeue --me
 ```
 
 ```text
-           JOBID PARTITION     NAME  USER ST  TIME NODES NODELIST(REASON)
-4211873_[11-101] gpu-mig summariz mst3k PD  0:00     1 (Resources)
-       4211873_1   gpu-mig summariz mst3k  R  0:41     1 udc-an36-1
-       4211873_2   gpu-mig summariz mst3k  R  0:41     1 udc-an36-1
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+  4211873_[15-101]   gpu-mig summariz    mst3k PD       0:00      1 (None)
+         4211873_1   gpu-mig summariz    mst3k  R       0:18      1 udc-aw37-1
+         4211873_2   gpu-mig summariz    mst3k  R       0:18      1 udc-aw37-1
 ...
+        4211873_14   gpu-mig summariz    mst3k  R       0:18      1 udc-aw37-1
 ```
 
-`ST` is the state: `PD` pending, `R` running. While tasks wait, the last column shows why: `(Resources)` or `(Priority)` means that they wait for free slices; a reason that starts with `QOS` means that you reached a per-user limit. Run `squeue --me` again after a minute: finished tasks disappear, and the next ones start.
+`ST` is the state: `PD` pending, `R` running. While tasks wait, the last column shows why: `(None)` means that Slurm has not considered them yet, for example right after you submitted; `(Resources)` or `(Priority)` means that they wait for free slices; a reason that starts with `QOS` means that you reached a per-user limit. Run `squeue --me` again after a minute: finished tasks disappear, and the next ones start.
 
 The log of each task is in `logs/`. Follow one while it runs, and stop following with `Ctrl+C` (the task keeps running):
 
@@ -463,18 +473,16 @@ To cancel the whole array, for example after a mistake in your script, run `scan
 
 ### Step 6: Check how the tasks ended
 
-When `squeue --me` no longer lists any task, check how each task ended:
+When `squeue --me` no longer lists any task, check how each task ended. **Replace `4211873`** with your job ID:
 
 ```bash
 sacct -j 4211873 -X --format=JobID,JobName,NodeList,State,ExitCode
 ```
 
-`-X` shows one line per task. Every task should be `COMPLETED` with exit code `0:0`. A task that is `FAILED` or `TIMEOUT` left its reason at the end of its log file (see [Troubleshooting](#troubleshooting)). Save the table for your submission, and count the completed tasks; it prints `101` if all of them completed:
+`-X` shows one line per task. Every task should be `COMPLETED` with exit code `0:0`. A task that is `FAILED` or `TIMEOUT` left its reason at the end of its log file (see [Troubleshooting](#troubleshooting)). Count the completed tasks; it prints `101` if all of them completed:
 
 ```bash
-mkdir -p results
-sacct -j 4211873 -X --format=JobID,JobName,NodeList,State,ExitCode > results/sacct.txt
-grep -c COMPLETED results/sacct.txt
+sacct -j 4211873 -X --format=JobID,State | grep -c COMPLETED
 ```
 
 To analyze the timing and the resource use of your tasks, answer the questions in the [Knowledge check](#knowledge-check).
@@ -485,10 +493,12 @@ To analyze the timing and the resource use of your tasks, answer the questions i
 uv run python src/book_analysis/report.py
 ```
 
-`summarized` is now `101`. `runs_by_job` has one entry per job array, with the number of books its tasks summarized: `101` for your array, and `1` for your test from Step 3. `genres` counts the books per genre, and `last_summarized` shows three summaries. Save the report for your submission, and check it with `jq`; it prints `101` if the file is complete:
+`summarized` is now `101`. `runs_by_job` has one entry per job array, with the number of books its tasks summarized: `101` for your array, and `1` for your test from Step 3. `genres` counts the books per genre, and `last_summarized` shows three summaries. Save the report for your submission, and check it with `jq` (Setup step 7); it prints `101` if the file is complete:
 
 ```bash
+mkdir -p results
 uv run python src/book_analysis/report.py > results/report.json
+module load jq
 jq '.summarized' results/report.json
 ```
 
@@ -502,7 +512,6 @@ cp logs/summarize-4211873_1.out results/
 
 ### Milestone 1
 
-- [ ] `grep -c COMPLETED results/sacct.txt` prints `101`.
 - [ ] `jq '.summarized' results/report.json` prints `101`.
 - [ ] `results/` has the log file of one task.
 - [ ] `git status` lists `get_books.sh` and `book_list.txt` as new, and `summarize.slurm` and `src/book_analysis/summarize.py` as modified.
@@ -621,7 +630,6 @@ Submit when Part 1 is done, and Part 2 if you chose to do it. Your submission is
   | --- | --- |
   | `job-history.txt` | Knowledge check, question 1 |
   | `seff.txt` | Knowledge check, question 3 |
-  | `sacct.txt` | Part 1, Step 6 |
   | `report.json` | Part 1, Step 7 (or Part 2, if you did it) |
   | `summarize-<job ID>_1.out` | Part 1, Step 7 |
 
@@ -714,6 +722,7 @@ The goal is that you can write and debug a Slurm job, not that Claude Code can. 
 - `aws: command not found`**.** Run `module load awscli` first (Setup step 6).
 - `KeyError: 'MONGODB_ATLAS_URL'`**.** The Atlas variables are not set in this shell or job. Check them without displaying their values: `printenv MONGODB_ATLAS_URL MONGODB_ATLAS_USER MONGODB_ATLAS_PWD >/dev/null && echo "All variables are set"`. If they are not all set, check `~/.bashrc` (Setup step 3), run `source ~/.bashrc`, and submit again from that shell.
 - `mongosh: command not found`**.** Run `module load mongosh` first (Setup step 3).
+- `jq: command not found`**.** Run `module load jq` first (Setup step 7).
 - `mongosh` **prints** `Authentication failed` **or** `bad auth`**.** The user or the password is wrong: compare `MONGODB_ATLAS_USER` with the database user in Atlas (**Database Access**), and paste the password again. `MongoServerSelectionError` **or a timeout** means the same as `ServerSelectionTimeoutError` below.
 
 **Getting the books (Setup)**
@@ -740,9 +749,7 @@ The goal is that you can write and debug a Slurm job, not that Claude Code can. 
 
 - `OSError: We couldn't connect to 'https://huggingface.co'` **or** `LocalEntryNotFoundError`**.** The model is not in `$HF_HOME`: run Setup step 5 on the login node, and check that `echo $HF_HOME` prints the same path in your job as on the login node.
 - **The log shows** `INFO Running Qwen/Qwen2.5-1.5B-Instruct on cpu` **and the task is very slow.** The task got no GPU slice: check `--partition=gpu-mig` and `--gres=gpu:1` in your script. Without `--gres`, Slurm gives the task CPU cores only.
-- `sbatch: error: Invalid generic resource (gres) specification` **or** `Requested node configuration is not available`**.** A job on `gpu-mig` gets exactly one slice, with at most 4 CPU cores: check `--gres=gpu:1` (not `gpu:2`, and no GPU type such as `gpu:a100:1`) and `--cpus-per-task=4`.
-
-<!-- TODO check: torch 2.15 (CUDA 13 wheels in uv.lock) runs on a gpu-mig slice (RTX PRO 6000, Blackwell); the exact sbatch messages for gpu:2 and --cpus-per-task above 4 on gpu-mig -->
+- `sbatch` **rejects the job with an error about the GPU, the CPUs, or the node configuration.** A job on `gpu-mig` gets exactly one slice, with at most 4 CPU cores, and the scheduler rejects any larger request: check `--gres=gpu:1` (not `gpu:2`, and no GPU type such as `gpu:a100:1`) and `--cpus-per-task=2`.
 
 **Slurm**
 
