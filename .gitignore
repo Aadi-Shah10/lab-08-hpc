@@ -1,0 +1,21 @@
+# Python virtual environment and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets: never commit credentials or private keys
+.env
+.aws/
+*credentials*
+*.pem
+
+# Downloaded books (they live in S3)
+pg*.txt
+
+# Slurm logs: copy the ones you submit into results/
+logs/

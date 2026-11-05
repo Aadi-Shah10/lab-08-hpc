@@ -1,0 +1,15 @@
+[project]
+name = "book-analysis"
+version = "0.1.0"
+description = "Lab 08: summarize the Lab 06 books with transformer models on UVA HPC"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pymongo>=4.19.0",
+    "torch",
+    "transformers",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
