@@ -1,0 +1,22 @@
+JobID           JobName      User    Account  Partition  AllocCPUS              Submit               Start    Elapsed      State ExitCode 
+------------ ---------- --------- ---------- ---------- ---------- ------------------- ------------------- ---------- ---------- -------- 
+22516914     ood_vscode    zvp4ft     ds2022 interacti+          1 2026-11-05T14:17:37 2026-11-05T14:17:49   00:32:35 CANCELLED+      0:0 
+22516914.ba+      batch               ds2022                     1 2026-11-05T14:17:49 2026-11-05T14:17:49   00:32:36  CANCELLED     0:15 
+22517077      tsla_plot    zvp4ft ds1002_md+ standard-+          1 2026-11-05T14:23:38 2026-11-05T14:24:31   00:00:16  COMPLETED      0:0 
+22517077.ba+      batch           ds1002_md+                     1 2026-11-05T14:24:31 2026-11-05T14:24:31   00:00:16  COMPLETED      0:0 
+22517179      tsla_plot    zvp4ft ds1002_md+ standard-+          1 2026-11-05T14:30:15 2026-11-05T14:30:20   00:00:04  COMPLETED      0:0 
+22517179.ba+      batch           ds1002_md+                     1 2026-11-05T14:30:20 2026-11-05T14:30:20   00:00:04  COMPLETED      0:0 
+22517532     ood_jupyt+    zvp4ft ds1002_md+ standard-+          0 2026-11-05T14:50:11                None   00:00:00 CANCELLED+      0:0 
+22517544     ood_jupyt+    zvp4ft     ds2022 standard-+          1 2026-11-05T14:51:13 2026-11-05T14:51:22   00:00:25 CANCELLED+      0:0 
+22517544.ba+      batch               ds2022                     1 2026-11-05T14:51:22 2026-11-05T14:51:22   00:00:26  CANCELLED     0:15 
+22517610     ood_vscode    zvp4ft     ds2022 interacti+          1 2026-11-05T14:52:21 2026-11-05T14:53:00   00:00:30 CANCELLED+      0:0 
+22517610.ba+      batch               ds2022                     1 2026-11-05T14:53:00 2026-11-05T14:53:00   00:00:31  CANCELLED     0:15 
+22517760     ood_vscode    zvp4ft     ds2022 interacti+          1 2026-11-05T14:54:12 2026-11-05T14:54:14   00:01:07 CANCELLED+      0:0 
+22517760.ba+      batch               ds2022                     1 2026-11-05T14:54:14 2026-11-05T14:54:14   00:01:08  CANCELLED     0:15 
+22517902          hello    zvp4ft     ds2022 interacti+          1 2026-11-05T14:55:51 2026-11-05T14:57:46   00:00:03  COMPLETED      0:0 
+22517902.ba+      batch               ds2022                     1 2026-11-05T14:57:46 2026-11-05T14:57:46   00:00:03  COMPLETED      0:0 
+22518026          hello    zvp4ft     ds2022 interacti+          1 2026-11-05T14:58:21 2026-11-05T14:58:52   00:00:02  COMPLETED      0:0 
+22518026.ba+      batch               ds2022                     1 2026-11-05T14:58:52 2026-11-05T14:58:52   00:00:02  COMPLETED      0:0 
+22518240          hello    zvp4ft     ds2022 interacti+          0 2026-11-05T15:00:03                None   00:00:00 CANCELLED+      0:0 
+22848302_[1]  summarize    zvp4ft     ds2022    gpu-mig          0 2026-11-11T20:03:14             Unknown   00:00:00    PENDING      0:0 
+22851576_[1+  summarize    zvp4ft     ds2022    gpu-mig          0 2026-11-11T21:14:39             Unknown   00:00:00    PENDING      0:0 

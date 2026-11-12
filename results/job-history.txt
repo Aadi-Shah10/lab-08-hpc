@@ -1,0 +1,22 @@
+JobID                     JobName        NodeList  Partition    Account      User      State               Start    Elapsed 
+------------ -------------------- --------------- ---------- ---------- --------- ---------- ------------------- ---------- 
+22516914               ood_vscode   udc-aw32-10c0 interacti+     ds2022    zvp4ft CANCELLED+ 2026-11-05T14:17:49   00:32:35 
+22516914.ba+                batch   udc-aw32-10c0                ds2022            CANCELLED 2026-11-05T14:17:49   00:32:36 
+22517077                tsla_plot    udc-aw34-4c0 standard-+ ds1002_md+    zvp4ft  COMPLETED 2026-11-05T14:24:31   00:00:16 
+22517077.ba+                batch    udc-aw34-4c0            ds1002_md+            COMPLETED 2026-11-05T14:24:31   00:00:16 
+22517179                tsla_plot    udc-aw33-3c1 standard-+ ds1002_md+    zvp4ft  COMPLETED 2026-11-05T14:30:20   00:00:04 
+22517179.ba+                batch    udc-aw33-3c1            ds1002_md+            COMPLETED 2026-11-05T14:30:20   00:00:04 
+22517532              ood_jupyter   None assigned standard-+ ds1002_md+    zvp4ft CANCELLED+                None   00:00:00 
+22517544              ood_jupyter    udc-aw34-2c1 standard-+     ds2022    zvp4ft CANCELLED+ 2026-11-05T14:51:22   00:00:25 
+22517544.ba+                batch    udc-aw34-2c1                ds2022            CANCELLED 2026-11-05T14:51:22   00:00:26 
+22517610               ood_vscode   udc-aw32-13c0 interacti+     ds2022    zvp4ft CANCELLED+ 2026-11-05T14:53:00   00:00:30 
+22517610.ba+                batch   udc-aw32-13c0                ds2022            CANCELLED 2026-11-05T14:53:00   00:00:31 
+22517760               ood_vscode   udc-aw32-13c0 interacti+     ds2022    zvp4ft CANCELLED+ 2026-11-05T14:54:14   00:01:07 
+22517760.ba+                batch   udc-aw32-13c0                ds2022            CANCELLED 2026-11-05T14:54:14   00:01:08 
+22517902                    hello   udc-aw32-13c0 interacti+     ds2022    zvp4ft  COMPLETED 2026-11-05T14:57:46   00:00:03 
+22517902.ba+                batch   udc-aw32-13c0                ds2022            COMPLETED 2026-11-05T14:57:46   00:00:03 
+22518026                    hello   udc-aw32-10c0 interacti+     ds2022    zvp4ft  COMPLETED 2026-11-05T14:58:52   00:00:02 
+22518026.ba+                batch   udc-aw32-10c0                ds2022            COMPLETED 2026-11-05T14:58:52   00:00:02 
+22518240                    hello   None assigned interacti+     ds2022    zvp4ft CANCELLED+                None   00:00:00 
+22848302_[1]            summarize   None assigned    gpu-mig     ds2022    zvp4ft    PENDING             Unknown   00:00:00 
+22851576_[1+            summarize   None assigned    gpu-mig     ds2022    zvp4ft    PENDING             Unknown   00:00:00 
